@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { projects as allProjects } from "@/projects.config";
 
 interface AdminUser {
   id: string;
@@ -212,12 +213,27 @@ export default function AdminPanel({ apiUrl, onClose }: AdminPanelProps) {
                 >
                   {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
                 </select>
-                <input
-                  placeholder="Project IDs (comma-separated)"
-                  value={createForm.projectIds}
-                  onChange={e => setCreateForm(f => ({ ...f, projectIds: e.target.value }))}
-                  className={inputCls}
-                />
+                <div className="flex flex-col gap-1">
+                  <span className="text-xs text-gray-500 dark:text-gray-400">Projects</span>
+                  {allProjects.map(p => {
+                    const checked = createForm.projectIds.split(',').map(s => s.trim()).filter(Boolean).includes(p.id);
+                    return (
+                      <label key={p.id} className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={e => {
+                            const current = createForm.projectIds.split(',').map(s => s.trim()).filter(Boolean);
+                            const next = e.target.checked ? [...current, p.id] : current.filter(x => x !== p.id);
+                            setCreateForm(f => ({ ...f, projectIds: next.join(',') }));
+                          }}
+                          className="rounded border-gray-300 dark:border-gray-600 text-indigo-600 focus:ring-indigo-500"
+                        />
+                        {p.name}
+                      </label>
+                    );
+                  })}
+                </div>
               </div>
               {createError && <p className="text-xs text-red-500 mt-2">{createError}</p>}
               <div className="flex gap-2 mt-3">
@@ -271,12 +287,27 @@ export default function AdminPanel({ apiUrl, onClose }: AdminPanelProps) {
                       >
                         {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
                       </select>
-                      <input
-                        placeholder="Project IDs (comma-separated)"
-                        value={editForm.projectIdsStr ?? ""}
-                        onChange={e => setEditForm(f => ({ ...f, projectIdsStr: e.target.value }))}
-                        className={inputCls}
-                      />
+                      <div className="flex flex-col gap-1">
+                        <span className="text-xs text-gray-500 dark:text-gray-400">Projects</span>
+                        {allProjects.map(p => {
+                          const current = (editForm.projectIdsStr ?? "").split(',').map(s => s.trim()).filter(Boolean);
+                          const checked = current.includes(p.id);
+                          return (
+                            <label key={p.id} className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={e => {
+                                  const next = e.target.checked ? [...current, p.id] : current.filter(x => x !== p.id);
+                                  setEditForm(f => ({ ...f, projectIdsStr: next.join(', ') }));
+                                }}
+                                className="rounded border-gray-300 dark:border-gray-600 text-indigo-600 focus:ring-indigo-500"
+                              />
+                              {p.name}
+                            </label>
+                          );
+                        })}
+                      </div>
                       <input
                         placeholder="New password (leave blank to keep)"
                         type="password"
@@ -319,9 +350,35 @@ export default function AdminPanel({ apiUrl, onClose }: AdminPanelProps) {
                         </span>
                       </div>
                       <p className="text-xs text-gray-400 mt-0.5 truncate">{u.email}</p>
-                      {u.projectIds.length > 0 && (
-                        <p className="text-xs text-gray-400 mt-0.5">Projects: {u.projectIds.join(", ")}</p>
-                      )}
+                      <div className="flex items-center gap-3 mt-1">
+                        {allProjects.map(p => {
+                          const checked = u.projectIds.includes(p.id);
+                          return (
+                            <label key={p.id} className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={async (e) => {
+                                  const next = e.target.checked
+                                    ? [...u.projectIds, p.id]
+                                    : u.projectIds.filter(x => x !== p.id);
+                                  // Optimistic update
+                                  setUsers(prev => prev.map(usr => usr.id === u.id ? { ...usr, projectIds: next } : usr));
+                                  // Save immediately
+                                  await fetch(`${apiUrl}/api/admin/users/${u.id}`, {
+                                    method: "PATCH",
+                                    headers: { "Content-Type": "application/json" },
+                                    credentials: "include",
+                                    body: JSON.stringify({ projectIds: next })
+                                  });
+                                }}
+                                className="rounded border-gray-300 dark:border-gray-600 text-indigo-600 focus:ring-indigo-500 h-3.5 w-3.5"
+                              />
+                              {p.name}
+                            </label>
+                          );
+                        })}
+                      </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       <button
