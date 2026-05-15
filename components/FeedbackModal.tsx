@@ -1,4 +1,5 @@
 "use client";
+import { authFetch } from "@/lib/auth";
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { User } from "@/app/page";
@@ -53,10 +54,9 @@ export default function FeedbackModal({ apiUrl, user, onClose }: FeedbackModalPr
     setIsTyping(true);
 
     try {
-      const res = await fetch(`${apiUrl}/api/feedback/chat`, {
+      const res = await authFetch(`${apiUrl}/api/feedback/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify({
           messages: newMessages,
           feedbackId
@@ -95,10 +95,9 @@ export default function FeedbackModal({ apiUrl, user, onClose }: FeedbackModalPr
     setUploadingScreenshot(true);
 
     try {
-      const urlRes = await fetch(`${apiUrl}/api/feedback/screenshot-url`, {
+      const urlRes = await authFetch(`${apiUrl}/api/feedback/screenshot-url`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify({
           feedbackId,
           filename: file.name,
@@ -113,10 +112,9 @@ export default function FeedbackModal({ apiUrl, user, onClose }: FeedbackModalPr
         body: file
       });
 
-      await fetch(`${apiUrl}/api/feedback/${feedbackId}/screenshot`, {
+      await authFetch(`${apiUrl}/api/feedback/${feedbackId}/screenshot`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify({ screenshotUrl: fileUrl })
       });
 

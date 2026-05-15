@@ -1,4 +1,5 @@
 "use client";
+import { authFetch } from "@/lib/auth";
 
 import { useEffect, useState } from "react";
 import { User } from "@/app/page";
@@ -51,7 +52,7 @@ export default function FeedbackHistory({ apiUrl, user, onClose }: FeedbackHisto
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch(`${apiUrl}/api/feedback`, { credentials: "include" })
+    authFetch(`${apiUrl}/api/feedback`)
       .then(r => r.json())
       .then(data => {
         setItems(data.feedback || []);

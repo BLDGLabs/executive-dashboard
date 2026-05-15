@@ -44,7 +44,20 @@ async function getDbClient() {
   return client;
 }
 
-// Parse cookies from the Cookie header string
+// Get bearer token from Authorization header
+function getBearerToken(event) {
+  const auth = event.headers?.Authorization || event.headers?.authorization || '';
+  if (auth.startsWith('Bearer ')) return auth.slice(7);
+  // Fallback: check cookie for backward compat
+  const cookieHeader = event.headers?.Cookie || event.headers?.cookie || '';
+  if (cookieHeader) {
+    const match = cookieHeader.match(/session=([^;]+)/);
+    if (match) return match[1];
+  }
+  return null;
+}
+
+// LEGACY: Parse cookies from the Cookie header string
 function parseCookies(cookieHeader) {
   if (!cookieHeader) return {};
   return cookieHeader.split(';').reduce((acc, part) => {
@@ -54,11 +67,12 @@ function parseCookies(cookieHeader) {
   }, {});
 }
 
-// Get the session cookie value from an event
+// Get the session ID from Bearer token or cookie
 function getSessionId(event) {
-  // API Gateway REST API: event.headers.Cookie or event.headers.cookie
+  const token = getBearerToken(event);
+  if (token) return token;
+  // Legacy cookie fallback
   const cookieHeader = event.headers?.Cookie || event.headers?.cookie || '';
-  // API Gateway HTTP API may also have event.cookies array
   if (!cookieHeader && event.cookies) {
     const arr = Array.isArray(event.cookies) ? event.cookies : [];
     for (const c of arr) {
@@ -217,6 +231,7 @@ exports.handler = async (event) => {
             role: user.role,
             projectIds: user.project_ids || []
           },
+          token: sessionId,
           sessionId
         })
       };

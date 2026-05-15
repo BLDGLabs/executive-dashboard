@@ -10,6 +10,7 @@ import LoginPage from "@/components/LoginPage";
 import AdminPanel from "@/components/AdminPanel";
 import { projects } from "@/projects.config";
 import ProjectSwitcher from "@/components/ProjectSwitcher";
+import { authFetch, setToken, clearToken } from "@/lib/auth";
 
 export type User = {
   id: string;
@@ -64,12 +65,11 @@ export default function Home() {
 
   // Check session on mount
   useEffect(() => {
-    fetch(`${baseUrl}/api/auth/me`, { credentials: "include" })
+    authFetch(`${baseUrl}/api/auth/me`)
       .then(r => r.ok ? r.json() : null)
       .then(data => {
         if (data?.user) {
           setUser(data.user);
-          // Restore last project
           const userProjs = projects.filter(p => data.user.projectIds.includes(p.id) || data.user.role === 'superadmin');
           const saved = localStorage.getItem('lastProject');
           const savedProj = saved ? userProjs.find(p => p.id === saved) : null;
@@ -83,9 +83,7 @@ export default function Home() {
   async function fetchData() {
     try {
       setLoading(true);
-      const res = await fetch(`${currentProject.apiUrl}?project=${currentProject.jiraProject}`, {
-        credentials: "include"
-      });
+      const res = await authFetch(`${currentProject.apiUrl}?project=${currentProject.jiraProject}`);
       if (!res.ok) throw new Error(`API error: ${res.status}`);
       const data = await res.json();
       setEpics(data.epics || []);
@@ -105,9 +103,9 @@ export default function Home() {
   }, [user, currentProject]);
 
   const handleLogout = async () => {
-    await fetch(`${baseUrl}/api/auth/logout`, {
-      method: "POST",
-      credentials: "include"
+    clearToken();
+    await authFetch(`${baseUrl}/api/auth/logout`, {
+      method: "POST"
     });
     setUser(null);
     setEpics([]);

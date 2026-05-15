@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { User } from "@/app/page";
+import { setToken } from "@/lib/auth";
 
 interface LoginPageProps {
   apiUrl: string;
@@ -24,7 +25,6 @@ export default function LoginPage({ apiUrl, onLogin }: LoginPageProps) {
       const res = await fetch(`${apiUrl}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify({ email: email.trim(), password }),
       });
 
@@ -35,6 +35,8 @@ export default function LoginPage({ apiUrl, onLogin }: LoginPageProps) {
         return;
       }
 
+      // Store token in localStorage
+      if (data.token) setToken(data.token);
       onLogin(data.user);
     } catch (err) {
       setError("Network error — please try again");

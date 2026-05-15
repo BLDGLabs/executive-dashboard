@@ -1,4 +1,5 @@
 "use client";
+import { authFetch } from "@/lib/auth";
 
 import { useEffect, useState } from "react";
 import { projects as allProjects } from "@/projects.config";
@@ -47,7 +48,6 @@ export default function AdminPanel({ apiUrl, onClose }: AdminPanelProps) {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${apiUrl}/api/admin/users`, { credentials: "include" });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to load users");
       setUsers(data.users || []);
@@ -90,10 +90,9 @@ export default function AdminPanel({ apiUrl, onClose }: AdminPanelProps) {
       };
       if (editForm.password) body.password = editForm.password;
 
-      const res = await fetch(`${apiUrl}/api/admin/users/${id}`, {
+      const res = await authFetch(`${apiUrl}/api/admin/users/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify(body)
       });
       const data = await res.json();
@@ -111,9 +110,8 @@ export default function AdminPanel({ apiUrl, onClose }: AdminPanelProps) {
     if (!confirm("Delete this user? This cannot be undone.")) return;
     setDeletingId(id);
     try {
-      await fetch(`${apiUrl}/api/admin/users/${id}`, {
+      await authFetch(`${apiUrl}/api/admin/users/${id}`, {
         method: "DELETE",
-        credentials: "include"
       });
       await loadUsers();
     } finally {
@@ -125,10 +123,9 @@ export default function AdminPanel({ apiUrl, onClose }: AdminPanelProps) {
     setCreating(true);
     setCreateError(null);
     try {
-      const res = await fetch(`${apiUrl}/api/admin/users`, {
+      const res = await authFetch(`${apiUrl}/api/admin/users`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify({
           email: createForm.email.trim(),
           password: createForm.password,
@@ -365,10 +362,9 @@ export default function AdminPanel({ apiUrl, onClose }: AdminPanelProps) {
                                   // Optimistic update
                                   setUsers(prev => prev.map(usr => usr.id === u.id ? { ...usr, projectIds: next } : usr));
                                   // Save immediately
-                                  await fetch(`${apiUrl}/api/admin/users/${u.id}`, {
+                                  await authFetch(`${apiUrl}/api/admin/users/${u.id}`, {
                                     method: "PATCH",
                                     headers: { "Content-Type": "application/json" },
-                                    credentials: "include",
                                     body: JSON.stringify({ projectIds: next })
                                   });
                                 }}
