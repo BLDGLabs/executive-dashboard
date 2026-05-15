@@ -130,7 +130,7 @@ export default function EpicTimeline({ epics, hoveredKey, onHover, showUpcoming,
           <div style={{ minWidth: "640px" }}>
             {/* Month markers — offset to align with bar area */}
             <div className="flex">
-              <div className="w-44 shrink-0" />
+              <div className="w-52 shrink-0" />
               <div className="flex-1 relative h-6 mb-2">
                 {markers.map((m) => (
                   <span
@@ -149,7 +149,7 @@ export default function EpicTimeline({ epics, hoveredKey, onHover, showUpcoming,
               {/* Today line — only over the bar area, offset by label width */}
               {todayPct >= 0 && todayPct <= 100 && (
                 <div className="absolute top-0 bottom-0 flex pointer-events-none" style={{ left: 0, right: 0 }}>
-                  <div className="w-44 shrink-0" />
+                  <div className="w-52 shrink-0" />
                   <div className="flex-1 relative">
                     <div
                       className="absolute top-0 bottom-0 w-px bg-indigo-500/60 z-10"
@@ -190,7 +190,7 @@ export default function EpicTimeline({ epics, hoveredKey, onHover, showUpcoming,
                     onMouseEnter={() => onHover(epic.key)}
                     onMouseLeave={() => onHover(null)}
                   >
-                    <div className="w-44 shrink-0 pr-3 text-xs text-gray-600 dark:text-gray-400 truncate text-right">
+                    <div className="w-52 shrink-0 pr-3 text-xs text-gray-600 dark:text-gray-400 truncate text-right">
                       {epic.summary}
                     </div>
                     <div className="flex-1 relative h-6">
