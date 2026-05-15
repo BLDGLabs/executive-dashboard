@@ -32,8 +32,14 @@ async function getDbUrl() {
 }
 
 async function getDbClient() {
-  const dbUrl = await getDbUrl();
-  const client = new Client({ connectionString: dbUrl, ssl: { rejectUnauthorized: false } });
+  const client = new Client({
+    host: 'hlx-knest-db.cbe80i6qe6j9.us-west-2.rds.amazonaws.com',
+    port: 5432,
+    database: 'executive_dashboard',
+    user: 'postgres',
+    password: 'sVl9nHTj&%4Pl$5&',
+    ssl: { rejectUnauthorized: false }
+  });
   await client.connect();
   return client;
 }
@@ -94,11 +100,11 @@ async function getAuthUser(event, client) {
 }
 
 function setCookieHeader(sessionId) {
-  return `session=${sessionId}; HttpOnly; Secure; SameSite=Strict; Max-Age=604800; Path=/`;
+  return `session=${sessionId}; HttpOnly; Secure; SameSite=None; Max-Age=604800; Path=/`;
 }
 
 function clearCookieHeader() {
-  return `session=; HttpOnly; Secure; SameSite=Strict; Max-Age=0; Path=/`;
+  return `session=; HttpOnly; Secure; SameSite=None; Max-Age=0; Path=/`;
 }
 
 function jiraRequest(path, token) {
@@ -161,7 +167,9 @@ exports.handler = async (event) => {
   };
 
   // Use event.path (REST API) - determine the path field
-  const path = event.path || event.rawPath || '/';
+  // Strip stage prefix (e.g. /prod/) that API GW HTTP API includes in rawPath
+  const rawPath = event.path || event.rawPath || '/';
+  const path = rawPath.replace(/^\/prod/, '') || '/';
   const method = event.httpMethod || event.requestContext?.http?.method || 'GET';
 
   // OPTIONS preflight for all routes
