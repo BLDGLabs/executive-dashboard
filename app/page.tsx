@@ -63,14 +63,14 @@ export default function Home() {
 
   // Check session on mount
   useEffect(() => {
-    fetch(`${project.apiUrl}/api/auth/me`, { credentials: "include" })
+    fetch(`${baseUrl}/api/auth/me`, { credentials: "include" })
       .then(r => r.ok ? r.json() : null)
       .then(data => {
         if (data?.user) setUser(data.user);
       })
       .catch(() => {})
       .finally(() => setAuthLoading(false));
-  }, [project.apiUrl]);
+  }, [baseUrl]);
 
   async function fetchData() {
     try {
@@ -97,7 +97,7 @@ export default function Home() {
   }, [user]);
 
   const handleLogout = async () => {
-    await fetch(`${project.apiUrl}/api/auth/logout`, {
+    await fetch(`${baseUrl}/api/auth/logout`, {
       method: "POST",
       credentials: "include"
     });
@@ -117,7 +117,7 @@ export default function Home() {
 
   // Login gate
   if (!user) {
-    return <LoginPage apiUrl={project.apiUrl} onLogin={setUser} />;
+    return <LoginPage apiUrl={baseUrl} onLogin={setUser} />;
   }
 
   const visibleEpics = epics.filter(e => getStatusGroup(e.status) !== "Other");
