@@ -5,6 +5,7 @@ import MetricCards from "@/components/MetricCards";
 import EpicTimeline from "@/components/EpicTimeline";
 import EpicList from "@/components/EpicList";
 import ThemeToggle from "@/components/ThemeToggle";
+import FeedbackButton from "@/components/FeedbackButton";
 import { projects } from "@/projects.config";
 
 export type Epic = {
@@ -83,6 +84,7 @@ export default function Home() {
           <p className="text-gray-500 dark:text-gray-400 mt-1">{project.description}</p>
         </div>
         <div className="text-right flex items-center gap-3">
+          <FeedbackButton apiUrl={project.apiUrl} />
           <ThemeToggle />
           <div>
           <button
