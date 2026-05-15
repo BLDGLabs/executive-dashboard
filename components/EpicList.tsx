@@ -23,29 +23,31 @@ type EpicCardProps = {
   statusBg: string;
   statusLabel: string;
   titleColor: string;
+  descColor: string;
+  dateColor: string;
   isHovered: boolean;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
 };
 
-function EpicCard({ epic, statusColor, statusBg, statusLabel, titleColor, isHovered, onMouseEnter, onMouseLeave }: EpicCardProps) {
+function EpicCard({ epic, statusColor, statusBg, statusLabel, titleColor, descColor, dateColor, isHovered, onMouseEnter, onMouseLeave }: EpicCardProps) {
   return (
     <div
-      className={`rounded-lg border ${statusBg} p-4 transition-all cursor-default ${isHovered ? "ring-2 ring-indigo-400/60 brightness-110" : ""}`}
+      className={`rounded-lg border ${statusBg} p-4 transition-all cursor-default ${isHovered ? "ring-2 ring-indigo-400/60" : ""}`}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
       <div className="flex items-start justify-between gap-2 mb-2">
         <h3 className={`text-sm font-semibold ${titleColor} leading-snug`}>{epic.summary}</h3>
-        <span className={`shrink-0 text-xs font-semibold px-2 py-0.5 rounded-full ${statusColor} opacity-90`}>
+        <span className={`shrink-0 text-xs font-semibold px-2 py-0.5 rounded-full ${statusColor}`}>
           {statusLabel}
         </span>
       </div>
       {epic.description && (
-        <p className="text-xs text-gray-300 leading-relaxed">{epic.description}</p>
+        <p className={`text-xs ${descColor} leading-relaxed`}>{epic.description}</p>
       )}
       {(epic.startDate || epic.dueDate) && (
-        <p className="text-xs text-gray-400 mt-2">
+        <p className={`text-xs ${dateColor} mt-2`}>
           {epic.startDate && (
             <>
               Start: {new Date(epic.startDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
@@ -64,9 +66,35 @@ function EpicCard({ epic, statusColor, statusBg, statusLabel, titleColor, isHove
 }
 
 const SECTION_CONFIG = {
-  inProgress: { label: "In Progress", statusLabel: "In Progress", color: "text-yellow-900 bg-yellow-400/30", bg: "bg-yellow-400/10 border-yellow-400/30", titleColor: "text-gray-900" },
-  toDo: { label: "Upcoming", statusLabel: "Upcoming", color: "text-blue-300 bg-blue-400/20", bg: "bg-blue-400/10 border-blue-400/30", titleColor: "text-white" },
-  complete: { label: "Historical", statusLabel: "Complete", color: "text-green-300 bg-green-400/20", bg: "bg-green-400/10 border-green-400/30", titleColor: "text-white" },
+  inProgress: {
+    label: "In Progress",
+    statusLabel: "In Progress",
+    // Badge: amber text on dark amber bg
+    color: "text-amber-300 bg-amber-500/20",
+    // Card: very subtle amber tint, visible border
+    bg: "bg-gray-800 border-amber-500/40",
+    titleColor: "text-white",
+    descColor: "text-gray-300",
+    dateColor: "text-gray-400",
+  },
+  toDo: {
+    label: "Upcoming",
+    statusLabel: "Upcoming",
+    color: "text-sky-300 bg-sky-500/20",
+    bg: "bg-gray-800 border-sky-500/40",
+    titleColor: "text-white",
+    descColor: "text-gray-300",
+    dateColor: "text-gray-400",
+  },
+  complete: {
+    label: "Complete",
+    statusLabel: "Complete",
+    color: "text-emerald-300 bg-emerald-500/20",
+    bg: "bg-gray-800 border-emerald-500/40",
+    titleColor: "text-white",
+    descColor: "text-gray-300",
+    dateColor: "text-gray-400",
+  },
 };
 
 export default function EpicList({ inProgress, toDo, complete, showSection, hoveredKey = null, onHover, showUpcoming = false, showHistorical = false, onToggleUpcoming, onToggleHistorical }: Props) {
@@ -99,6 +127,8 @@ export default function EpicList({ inProgress, toDo, complete, showSection, hove
                   statusBg={SECTION_CONFIG.inProgress.bg}
                   statusLabel={SECTION_CONFIG.inProgress.statusLabel}
                   titleColor={SECTION_CONFIG.inProgress.titleColor}
+                  descColor={SECTION_CONFIG.inProgress.descColor}
+                  dateColor={SECTION_CONFIG.inProgress.dateColor}
                   isHovered={epic.key === hoveredKey}
                   onMouseEnter={() => onHover?.(epic.key)}
                   onMouseLeave={() => onHover?.(null)}
@@ -135,6 +165,8 @@ export default function EpicList({ inProgress, toDo, complete, showSection, hove
                   statusBg={SECTION_CONFIG.toDo.bg}
                   statusLabel={SECTION_CONFIG.toDo.statusLabel}
                   titleColor={SECTION_CONFIG.toDo.titleColor}
+                  descColor={SECTION_CONFIG.toDo.descColor}
+                  dateColor={SECTION_CONFIG.toDo.dateColor}
                   isHovered={false}
                   onMouseEnter={() => {}}
                   onMouseLeave={() => {}}
@@ -162,6 +194,8 @@ export default function EpicList({ inProgress, toDo, complete, showSection, hove
                   statusBg={SECTION_CONFIG.complete.bg}
                   statusLabel={SECTION_CONFIG.complete.statusLabel}
                   titleColor={SECTION_CONFIG.complete.titleColor}
+                  descColor={SECTION_CONFIG.complete.descColor}
+                  dateColor={SECTION_CONFIG.complete.dateColor}
                   isHovered={false}
                   onMouseEnter={() => {}}
                   onMouseLeave={() => {}}
