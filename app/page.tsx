@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import MetricCards from "@/components/MetricCards";
 import EpicTimeline from "@/components/EpicTimeline";
 import EpicList from "@/components/EpicList";
+import ThemeToggle from "@/components/ThemeToggle";
 import { projects } from "@/projects.config";
 
 export type Epic = {
@@ -78,32 +79,35 @@ export default function Home() {
       {/* Header */}
       <div className="flex items-start justify-between mb-10">
         <div>
-          <h1 className="text-3xl font-bold text-white tracking-tight">{project.name}</h1>
-          <p className="text-gray-400 mt-1">{project.description}</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{project.name}</h1>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">{project.description}</p>
         </div>
-        <div className="text-right">
+        <div className="text-right flex items-center gap-3">
+          <ThemeToggle />
+          <div>
           <button
             onClick={fetchData}
-            className="text-sm text-indigo-400 hover:text-indigo-300 transition-colors"
+            className="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 transition-colors"
           >
             ↻ Refresh
           </button>
           {lastUpdated && (
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
               Updated {lastUpdated.toLocaleTimeString()}
             </p>
           )}
+          </div>
         </div>
       </div>
 
       {loading && (
         <div className="flex items-center justify-center h-64">
-          <div className="text-gray-400 animate-pulse">Loading dashboard...</div>
+          <div className="text-gray-500 dark:text-gray-400 animate-pulse">Loading dashboard...</div>
         </div>
       )}
 
       {error && (
-        <div className="bg-red-900/30 border border-red-700 rounded-lg p-4 text-red-300 mb-6">
+        <div className="bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 rounded-lg p-4 text-red-700 dark:text-red-300 mb-6">
           {error}
         </div>
       )}

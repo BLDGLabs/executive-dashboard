@@ -33,7 +33,7 @@ type EpicCardProps = {
 function EpicCard({ epic, statusColor, statusBg, statusLabel, titleColor, descColor, dateColor, isHovered, onMouseEnter, onMouseLeave }: EpicCardProps) {
   return (
     <div
-      className={`rounded-lg border ${statusBg} p-4 transition-all cursor-default ${isHovered ? "ring-2 ring-indigo-400/60" : ""}`}
+      className={`rounded-lg border ${statusBg} p-4 transition-all cursor-default ${isHovered ? "ring-2 ring-indigo-500/60" : ""}`}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
@@ -69,38 +69,36 @@ const SECTION_CONFIG = {
   inProgress: {
     label: "In Progress",
     statusLabel: "In Progress",
-    // Badge: amber text on dark amber bg
-    color: "text-amber-300 bg-amber-500/20",
-    // Card: very subtle amber tint, visible border
-    bg: "bg-gray-800 border-amber-500/40",
-    titleColor: "text-white",
-    descColor: "text-gray-300",
-    dateColor: "text-gray-400",
+    color: "text-amber-700 bg-amber-100 dark:text-amber-300 dark:bg-amber-500/20",
+    bg: "bg-white dark:bg-gray-800 border-amber-400 dark:border-amber-500/40",
+    titleColor: "text-gray-900 dark:text-white",
+    descColor: "text-gray-700 dark:text-gray-300",
+    dateColor: "text-gray-500 dark:text-gray-400",
   },
   toDo: {
     label: "Upcoming",
     statusLabel: "Upcoming",
-    color: "text-sky-300 bg-sky-500/20",
-    bg: "bg-gray-800 border-sky-500/40",
-    titleColor: "text-white",
-    descColor: "text-gray-300",
-    dateColor: "text-gray-400",
+    color: "text-sky-700 bg-sky-100 dark:text-sky-300 dark:bg-sky-500/20",
+    bg: "bg-white dark:bg-gray-800 border-sky-400 dark:border-sky-500/40",
+    titleColor: "text-gray-900 dark:text-white",
+    descColor: "text-gray-700 dark:text-gray-300",
+    dateColor: "text-gray-500 dark:text-gray-400",
   },
   complete: {
     label: "Complete",
     statusLabel: "Complete",
-    color: "text-emerald-300 bg-emerald-500/20",
-    bg: "bg-gray-800 border-emerald-500/40",
-    titleColor: "text-white",
-    descColor: "text-gray-300",
-    dateColor: "text-gray-400",
+    color: "text-emerald-700 bg-emerald-100 dark:text-emerald-300 dark:bg-emerald-500/20",
+    bg: "bg-white dark:bg-gray-800 border-emerald-400 dark:border-emerald-500/40",
+    titleColor: "text-gray-900 dark:text-white",
+    descColor: "text-gray-700 dark:text-gray-300",
+    dateColor: "text-gray-500 dark:text-gray-400",
   },
 };
 
 export default function EpicList({ inProgress, toDo, complete, showSection, hoveredKey = null, onHover, showUpcoming = false, showHistorical = false, onToggleUpcoming, onToggleHistorical }: Props) {
   // toggle state is now lifted — use props if provided, else local fallback
-  const [localShowUpcoming, setLocalShowUpcoming] = useState(false);
-  const [localShowHistorical, setLocalShowHistorical] = useState(false);
+  const [, setLocalShowUpcoming] = useState(false);
+  const [, setLocalShowHistorical] = useState(false);
   const isUpcoming = showUpcoming;
   const isHistorical = showHistorical;
   const toggleUpcoming = onToggleUpcoming ?? (() => setLocalShowUpcoming(v => !v));
@@ -109,7 +107,7 @@ export default function EpicList({ inProgress, toDo, complete, showSection, hove
   if (showSection === "active") {
     return (
       <div className="mb-10">
-        <h2 className="text-lg font-semibold text-gray-200 mb-4">In Progress</h2>
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-200 mb-4">In Progress</h2>
         {inProgress.length > 0 && (
           <div>
             <div className="flex items-center gap-2 mb-3">
@@ -143,6 +141,10 @@ export default function EpicList({ inProgress, toDo, complete, showSection, hove
 
   // showSection === "historical" — buttons are in the Timeline header now, just render cards
   if (!isUpcoming && !isHistorical) return null;
+
+  // suppress unused-warning for toggles when section is "historical" and props are passed
+  void toggleUpcoming;
+  void toggleHistorical;
 
   return (
     <div className="mt-8">
