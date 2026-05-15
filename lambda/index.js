@@ -691,7 +691,7 @@ IMPORTANT: End every response with a JSON action on its own line (no markdown, r
     const epicsBody = JSON.stringify({
       jql: `project=${project} AND issuetype=Epic AND status != Deferred ORDER BY created ASC`,
       maxResults: 100,
-      fields: ['summary', 'status', 'duedate', 'description', 'startdate', 'created', 'priority', 'customfield_10019']
+      fields: ['summary', 'status', 'duedate', 'description', 'startdate', 'customfield_10015', 'created', 'priority', 'customfield_10019']
     });
 
     const epicsData = await new Promise((resolve, reject) => {
@@ -785,7 +785,7 @@ IMPORTANT: End every response with a JSON action on its own line (no markdown, r
       key: i.key,
       summary: i.fields.summary,
       status: i.fields.status.name,
-      startDate: i.fields.startdate || (i.fields.created ? i.fields.created.split('T')[0] : null),
+      startDate: i.fields.startdate || i.fields.customfield_10015 || (i.fields.created ? i.fields.created.split('T')[0] : null),
       dueDate: i.fields.duedate || null,
       description: extractText(i.fields.description).slice(0, 300) || null,
       jiraRank: i.fields.customfield_10019 || '',
