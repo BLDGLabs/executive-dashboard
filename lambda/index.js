@@ -500,7 +500,7 @@ When the action is "link" or "create", your final assistant message MUST also in
 - **Expected behavior:** [what should happen]
 - **Actual behavior:** [what actually happened]
 - **Related Jira:** [SM-XXX if linked, or "New issue"]
----`;`
+---`;
 
       const cmd = new InvokeModelCommand({
         modelId: 'us.anthropic.claude-opus-4-6-v1',
