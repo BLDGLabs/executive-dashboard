@@ -238,25 +238,36 @@ export default function FeedbackModal({ apiUrl, user, onClose }: FeedbackModalPr
         )}
 
         {/* Input area */}
-        <div className="flex gap-2 p-3 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
-          <input
-            type="text"
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Describe your issue…"
-            disabled={isTyping || !!resolvedAction}
-            className="flex-1 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50"
-            autoFocus
-          />
-          <button
-            onClick={sendMessage}
-            disabled={!input.trim() || isTyping || !!resolvedAction}
-            className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-lg px-4 py-2 text-sm font-medium transition-colors"
-          >
-            Send
-          </button>
-        </div>
+        {resolvedAction ? (
+          <div className="flex p-3 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 justify-center">
+            <button
+              onClick={onClose}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg px-6 py-2 text-sm font-medium transition-colors"
+            >
+              Done
+            </button>
+          </div>
+        ) : (
+          <div className="flex gap-2 p-3 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+            <input
+              type="text"
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Describe your issue…"
+              disabled={isTyping}
+              className="flex-1 border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50"
+              autoFocus
+            />
+            <button
+              onClick={sendMessage}
+              disabled={!input.trim() || isTyping}
+              className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-lg px-4 py-2 text-sm font-medium transition-colors"
+            >
+              Send
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Close confirmation */}

@@ -143,7 +143,7 @@ function jiraRequest(path, token) {
 async function fetchOpenBugsForChat(token) {
   return new Promise((resolve, reject) => {
     const body = JSON.stringify({
-      jql: `project=SM AND issuetype in (Bug, Epic) AND status != "Done" AND status != "Deployed to Production" ORDER BY created DESC`,
+      jql: `project=SM AND issuetype = Bug AND status != "Done" AND status != "Deployed to Production" ORDER BY created DESC`,
       maxResults: 50,
       fields: ['summary', 'status', 'issuetype', 'description']
     });
@@ -489,7 +489,18 @@ ${JSON.stringify(issues, null, 2)}
 IMPORTANT: End every response with a JSON action on its own line (no markdown, raw JSON only):
 {"action":"continue"} — still gathering info
 {"action":"link","jiraKey":"SM-XXX"} — user confirmed match to existing issue
-{"action":"create"} — confirmed new issue, no existing match`;
+{"action":"create"} — confirmed new issue, no existing match
+
+When the action is "link" or "create", your final assistant message MUST also include a structured bug report synopsis in this exact format (before the JSON action line):
+
+---
+**Bug Report Synopsis**
+- **Summary:** [one-line description of the issue]
+- **Steps to reproduce:** [brief steps if mentioned, or "Not specified"]
+- **Expected behavior:** [what should happen]
+- **Actual behavior:** [what actually happened]
+- **Related Jira:** [SM-XXX if linked, or "New issue"]
+---`;`
 
       const cmd = new InvokeModelCommand({
         modelId: 'us.anthropic.claude-opus-4-6-v1',
@@ -527,8 +538,13 @@ IMPORTANT: End every response with a JSON action on its own line (no markdown, r
       let savedFeedbackId = feedbackId || null;
       if (action && (action.action === 'link' || action.action === 'create')) {
         try {
-          const lastUserMessage = [...messages].reverse().find(m => m.role === 'user');
-          const description = lastUserMessage ? lastUserMessage.content : '';
+          // Extract synopsis from the reply (between --- markers)
+          const synopsisMatch = reply.match(/---\s*\n([\s\S]*?)\n---/);
+          let description = synopsisMatch ? synopsisMatch[0].trim() : reply.trim();
+          if (!description) {
+            const lastUserMessage = [...messages].reverse().find(m => m.role === 'user');
+            description = lastUserMessage ? lastUserMessage.content : '';
+          }
           const status = action.action === 'link' ? 'linked' : 'not_reviewed';
           const jiraKey = action.jiraKey || null;
 
