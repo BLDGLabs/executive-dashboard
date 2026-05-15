@@ -34,9 +34,11 @@ export default function EpicTimeline({ epics }: Props) {
     .filter(e => e.startDate)
     .map(e => parseDate(e.startDate)!.getTime());
 
-  // Left edge: today (or the earliest explicit start date if it's before today)
+  // Left edge: 1 month before today, or earlier if an epic explicitly started before that
+  const oneMonthAgo = new Date(today);
+  oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
   const earliestStart = explicitStartDates.length > 0 ? Math.min(...explicitStartDates) : today.getTime();
-  const minDate = new Date(Math.min(earliestStart, today.getTime()));
+  const minDate = new Date(Math.min(earliestStart, oneMonthAgo.getTime()));
 
   // Right edge: latest due date + 1 month padding
   const maxDate = new Date(Math.max(...dueDates));
@@ -106,7 +108,7 @@ export default function EpicTimeline({ epics }: Props) {
 
             return (
               <div key={epic.key} className="flex items-center mb-2 group relative" style={{ minWidth: "600px" }}>
-                <div className="w-48 shrink-0 pr-3 text-xs text-gray-400 truncate text-right">{epic.summary}</div>
+                <div className="w-32 shrink-0 pr-3 text-xs text-gray-400 truncate text-right">{epic.summary}</div>
                 <div className="flex-1 relative h-6">
                   <div
                     className={`absolute h-5 rounded-full top-0.5 ${STATUS_BG[group]} border ${STATUS_COLORS[group]?.replace("bg-", "border-")}/30 flex items-center px-2 cursor-pointer transition-opacity`}
