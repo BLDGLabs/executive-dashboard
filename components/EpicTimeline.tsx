@@ -39,15 +39,20 @@ function parseDate(str: string | null): Date | null {
 }
 
 export default function EpicTimeline({ epics, hoveredKey, onHover, showUpcoming, showHistorical, onToggleUpcoming, onToggleHistorical, upcomingCount, historicalCount, rankMap = {} }: Props) {
-  // Only render epics that have at least a due date
-  const epicsWithDates = epics.filter(e => e.dueDate);
-  if (epicsWithDates.length === 0) return null;
+  if (epics.length === 0) return null;
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const dueDates: number[] = epicsWithDates.map(e => parseDate(e.dueDate)!.getTime());
-  const explicitStartDates: number[] = epicsWithDates
+  // Separate epics with/without due dates
+  const epicsWithDue = epics.filter(e => e.dueDate);
+  const epicsNoDue = epics.filter(e => !e.dueDate);
+
+  // Need at least one dated epic to build the timeline range
+  if (epicsWithDue.length === 0 && epicsNoDue.length === 0) return null;
+
+  const dueDates: number[] = epicsWithDue.map(e => parseDate(e.dueDate)!.getTime());
+  const explicitStartDates: number[] = epics
     .filter(e => e.startDate)
     .map(e => parseDate(e.startDate)!.getTime());
 
@@ -57,9 +62,12 @@ export default function EpicTimeline({ epics, hoveredKey, onHover, showUpcoming,
   const earliestStart = explicitStartDates.length > 0 ? Math.min(...explicitStartDates) : today.getTime();
   const minDate = new Date(Math.min(earliestStart, oneMonthAgo.getTime()));
 
-  // Right edge: latest due date + 1 month padding
-  const maxDate = new Date(Math.max(...dueDates));
+  // Right edge: latest due date + 1 month padding (fallback: today + 3 months)
+  const maxDateMs = dueDates.length > 0 ? Math.max(...dueDates) : today.getTime() + 90 * 24 * 60 * 60 * 1000;
+  const maxDate = new Date(maxDateMs);
   maxDate.setMonth(maxDate.getMonth() + 1);
+
+  const epicsWithDates = epics; // now all epics render
 
   const totalMs = maxDate.getTime() - minDate.getTime();
 
@@ -150,12 +158,13 @@ export default function EpicTimeline({ epics, hoveredKey, onHover, showUpcoming,
 
               {epicsWithDates.map((epic) => {
                 const group = getStatusGroup(epic.status);
-                const endDate = parseDate(epic.dueDate)!;
                 const startDate = parseDate(epic.startDate) ?? today;
+                const hasDueDate = !!epic.dueDate;
+                const endDate = hasDueDate ? parseDate(epic.dueDate)! : startDate;
 
                 const barLeft = Math.max(0, Math.min(getLeftPct(startDate), 100));
                 const barRight = Math.max(0, Math.min(getLeftPct(endDate), 100));
-                const barWidth = Math.max(barRight - barLeft, 1.5);
+                const barWidth = hasDueDate ? Math.max(barRight - barLeft, 1.5) : 0;
 
                 const isHovered = epic.key === hoveredKey;
                 const rowBg = isHovered ? "bg-gray-100 dark:bg-white/5" : "";
@@ -176,14 +185,29 @@ export default function EpicTimeline({ epics, hoveredKey, onHover, showUpcoming,
                       )}
                     </div>
                     <div className="flex-1 relative h-6">
-                      <div
-                        className={`absolute h-5 rounded-full top-0.5 ${barBg} border ${STATUS_COLORS[group]?.replace("bg-", "border-")}/30 flex items-center px-2 cursor-pointer transition-all`}
-                        style={{ left: `${barLeft}%`, width: `${barWidth}%`, minWidth: "60px" }}
-                        title={epic.description || epic.summary}
-                      >
-                        <span className={`w-2 h-2 rounded-full shrink-0 ${STATUS_COLORS[group]}`} />
-                        <span className="ml-1.5 text-xs text-gray-700 dark:text-gray-300 truncate hidden sm:block">{epic.summary}</span>
-                      </div>
+                      {hasDueDate ? (
+                        // Full bar for epics with a due date
+                        <div
+                          className={`absolute h-5 rounded-full top-0.5 ${barBg} border ${STATUS_COLORS[group]?.replace("bg-", "border-")}/30 flex items-center px-2 cursor-pointer transition-all`}
+                          style={{ left: `${barLeft}%`, width: `${barWidth}%`, minWidth: "60px" }}
+                          title={epic.description || epic.summary}
+                        >
+                          <span className={`w-2 h-2 rounded-full shrink-0 ${STATUS_COLORS[group]}`} />
+                          <span className="ml-1.5 text-xs text-gray-700 dark:text-gray-300 truncate hidden sm:block">{epic.summary}</span>
+                        </div>
+                      ) : (
+                        // Dot pin for epics with no due date — placed at start date
+                        <div
+                          className="absolute top-0.5 flex items-center cursor-pointer"
+                          style={{ left: `${barLeft}%` }}
+                          title={`${epic.summary} — no due date set`}
+                        >
+                          <span className={`w-4 h-4 rounded-full ${STATUS_COLORS[group]} flex items-center justify-center`}>
+                            <span className="w-2 h-2 rounded-full bg-white/60" />
+                          </span>
+                          <span className="ml-1.5 text-xs text-gray-500 dark:text-gray-400 hidden sm:block">No due date</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
