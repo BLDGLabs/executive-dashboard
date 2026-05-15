@@ -6,6 +6,12 @@ type Props = {
   epics: Epic[];
   hoveredKey: string | null;
   onHover: (key: string | null) => void;
+  showUpcoming: boolean;
+  showHistorical: boolean;
+  onToggleUpcoming: () => void;
+  onToggleHistorical: () => void;
+  upcomingCount: number;
+  historicalCount: number;
 };
 
 const STATUS_COLORS: Record<string, string> = {
@@ -31,7 +37,7 @@ function parseDate(str: string | null): Date | null {
   return new Date(str);
 }
 
-export default function EpicTimeline({ epics, hoveredKey, onHover }: Props) {
+export default function EpicTimeline({ epics, hoveredKey, onHover, showUpcoming, showHistorical, onToggleUpcoming, onToggleHistorical, upcomingCount, historicalCount }: Props) {
   // Only render epics that have at least a due date
   const epicsWithDates = epics.filter(e => e.dueDate);
   if (epicsWithDates.length === 0) return null;
@@ -79,7 +85,31 @@ export default function EpicTimeline({ epics, hoveredKey, onHover }: Props) {
 
   return (
     <div className="mb-10">
-      <h2 className="text-lg font-semibold text-gray-200 mb-4">Timeline</h2>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-semibold text-gray-200">Timeline</h2>
+        <div className="flex gap-2">
+          <button
+            onClick={onToggleUpcoming}
+            className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
+              showUpcoming
+                ? "bg-blue-400/20 border-blue-400/40 text-blue-300"
+                : "bg-gray-800 border-gray-700 text-gray-400 hover:text-gray-200"
+            }`}
+          >
+            {showUpcoming ? "Hide" : "Show"} Upcoming ({upcomingCount})
+          </button>
+          <button
+            onClick={onToggleHistorical}
+            className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
+              showHistorical
+                ? "bg-green-400/20 border-green-400/40 text-green-300"
+                : "bg-gray-800 border-gray-700 text-gray-400 hover:text-gray-200"
+            }`}
+          >
+            {showHistorical ? "Hide" : "Show"} Historical ({historicalCount})
+          </button>
+        </div>
+      </div>
       <div className="bg-gray-900 rounded-xl border border-gray-800 p-6">
         {/* Scrollable timeline area */}
         <div className="overflow-x-auto">

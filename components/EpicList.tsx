@@ -109,35 +109,11 @@ export default function EpicList({ inProgress, toDo, complete, showSection, hove
     );
   }
 
-  // showSection === "historical"
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-gray-200">Epics</h2>
-        <div className="flex gap-2">
-          <button
-            onClick={() => toggleUpcoming()}
-            className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
-              isUpcoming
-                ? "bg-blue-400/20 border-blue-400/40 text-blue-300"
-                : "bg-gray-800 border-gray-700 text-gray-400 hover:text-gray-200"
-            }`}
-          >
-            {isUpcoming ? "Hide" : "Show"} Upcoming ({toDo.length})
-          </button>
-          <button
-            onClick={() => toggleHistorical()}
-            className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${
-              isHistorical
-                ? "bg-green-400/20 border-green-400/40 text-green-300"
-                : "bg-gray-800 border-gray-700 text-gray-400 hover:text-gray-200"
-            }`}
-          >
-            {isHistorical ? "Hide" : "Show"} Historical ({complete.length})
-          </button>
-        </div>
-      </div>
+  // showSection === "historical" — buttons are in the Timeline header now, just render cards
+  if (!isUpcoming && !isHistorical) return null;
 
+  return (
+    <div className="mt-8">
       <div className="space-y-8">
         {/* Upcoming — toggle */}
         {isUpcoming && toDo.length > 0 && (

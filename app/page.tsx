@@ -125,7 +125,17 @@ export default function Home() {
             hoveredKey={hoveredKey}
             onHover={setHoveredKey}
           />
-          <EpicTimeline epics={timelineEpics} hoveredKey={hoveredKey} onHover={setHoveredKey} />
+          <EpicTimeline
+            epics={timelineEpics}
+            hoveredKey={hoveredKey}
+            onHover={setHoveredKey}
+            showUpcoming={showUpcoming}
+            showHistorical={showHistorical}
+            onToggleUpcoming={() => setShowUpcoming(v => !v)}
+            onToggleHistorical={() => setShowHistorical(v => !v)}
+            upcomingCount={toDo.length}
+            historicalCount={complete.length}
+          />
           <EpicList
             inProgress={inProgress}
             toDo={toDo}
@@ -133,8 +143,6 @@ export default function Home() {
             showSection="historical"
             showUpcoming={showUpcoming}
             showHistorical={showHistorical}
-            onToggleUpcoming={() => setShowUpcoming(v => !v)}
-            onToggleHistorical={() => setShowHistorical(v => !v)}
           />
         </>
       )}
