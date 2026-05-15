@@ -26,6 +26,8 @@ export type Epic = {
   startDate: string | null;
   dueDate: string | null;
   description: string | null;
+  priority: string;
+  priorityId: string;
 };
 
 export type Metrics = {

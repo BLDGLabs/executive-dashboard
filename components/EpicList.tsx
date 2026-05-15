@@ -28,9 +28,12 @@ type EpicCardProps = {
   isHovered: boolean;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
+  isTopPriority?: boolean;
+  epicPriority?: string;
 };
 
-function EpicCard({ epic, statusColor, statusBg, statusLabel, titleColor, descColor, dateColor, isHovered, onMouseEnter, onMouseLeave }: EpicCardProps) {
+function EpicCard({ epic, statusColor, statusBg, statusLabel, titleColor, descColor, dateColor, isHovered, onMouseEnter, onMouseLeave, isTopPriority = false, epicPriority = 'Medium' }: EpicCardProps) {
+  const showPriorityBadge = epicPriority !== 'Medium';
   return (
     <div
       className={`rounded-lg border ${statusBg} p-4 transition-all cursor-default ${isHovered ? "ring-2 ring-indigo-500/60" : ""}`}
@@ -38,7 +41,15 @@ function EpicCard({ epic, statusColor, statusBg, statusLabel, titleColor, descCo
       onMouseLeave={onMouseLeave}
     >
       <div className="flex items-start justify-between gap-2 mb-2">
-        <h3 className={`text-sm font-semibold ${titleColor} leading-snug`}>{epic.summary}</h3>
+        <div className="flex items-center gap-1.5 flex-1 min-w-0">
+          {isTopPriority && (
+            <span className="text-xs font-bold w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center shrink-0">1</span>
+          )}
+          {showPriorityBadge && (
+            <span className="text-xs font-medium px-1.5 py-0.5 rounded bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 shrink-0">{epicPriority}</span>
+          )}
+          <h3 className={`text-sm font-semibold ${titleColor} leading-snug`}>{epic.summary}</h3>
+        </div>
         <span className={`shrink-0 text-xs font-semibold px-2 py-0.5 rounded-full ${statusColor}`}>
           {statusLabel}
         </span>
@@ -117,7 +128,7 @@ export default function EpicList({ inProgress, toDo, complete, showSection, hove
               <span className="text-xs text-gray-500">{inProgress.length} epic{inProgress.length !== 1 ? "s" : ""}</span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {inProgress.map(epic => (
+              {inProgress.map((epic, index) => (
                 <EpicCard
                   key={epic.key}
                   epic={epic}
@@ -130,6 +141,8 @@ export default function EpicList({ inProgress, toDo, complete, showSection, hove
                   isHovered={epic.key === hoveredKey}
                   onMouseEnter={() => onHover?.(epic.key)}
                   onMouseLeave={() => onHover?.(null)}
+                  isTopPriority={index === 0}
+                  epicPriority={epic.priority}
                 />
               ))}
             </div>
