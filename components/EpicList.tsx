@@ -73,8 +73,8 @@ export default function EpicList({ inProgress, toDo, complete, showSection, hove
   // toggle state is now lifted — use props if provided, else local fallback
   const [localShowUpcoming, setLocalShowUpcoming] = useState(false);
   const [localShowHistorical, setLocalShowHistorical] = useState(false);
-  const isUpcoming = onToggleUpcoming ? showUpcoming : localShowUpcoming;
-  const isHistorical = onToggleHistorical ? showHistorical : localShowHistorical;
+  const isUpcoming = showUpcoming;
+  const isHistorical = showHistorical;
   const toggleUpcoming = onToggleUpcoming ?? (() => setLocalShowUpcoming(v => !v));
   const toggleHistorical = onToggleHistorical ?? (() => setLocalShowHistorical(v => !v));
 
