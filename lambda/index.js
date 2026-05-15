@@ -477,7 +477,7 @@ IMPORTANT: End every response with a JSON action on its own line (no markdown, r
 {"action":"create"} — confirmed new issue, no existing match`;
 
       const cmd = new InvokeModelCommand({
-        modelId: 'us.anthropic.claude-opus-4-6-v1:0',
+        modelId: 'us.anthropic.claude-opus-4-6-v1',
         contentType: 'application/json',
         accept: 'application/json',
         body: JSON.stringify({
