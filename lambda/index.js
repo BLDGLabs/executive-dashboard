@@ -50,7 +50,7 @@ exports.handler = async (event) => {
     const epicsBody = JSON.stringify({
       jql: `project=${project} AND issuetype=Epic AND status != Deferred ORDER BY created ASC`,
       maxResults: 100,
-      fields: ['summary', 'status', 'duedate', 'description', 'startdate']
+      fields: ['summary', 'status', 'duedate', 'description', 'startdate', 'created']
     });
 
     const epicsData = await new Promise((resolve, reject) => {
@@ -144,7 +144,7 @@ exports.handler = async (event) => {
       key: i.key,
       summary: i.fields.summary,
       status: i.fields.status.name,
-      startDate: i.fields.startdate || null,
+      startDate: i.fields.startdate || (i.fields.created ? i.fields.created.split('T')[0] : null),
       dueDate: i.fields.duedate || null,
       description: extractText(i.fields.description).slice(0, 300) || null
     }));
