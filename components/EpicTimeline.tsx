@@ -12,6 +12,7 @@ type Props = {
   onToggleHistorical: () => void;
   upcomingCount: number;
   historicalCount: number;
+  rankMap?: Record<string, number>;
 };
 
 const STATUS_COLORS: Record<string, string> = {
@@ -37,7 +38,7 @@ function parseDate(str: string | null): Date | null {
   return new Date(str);
 }
 
-export default function EpicTimeline({ epics, hoveredKey, onHover, showUpcoming, showHistorical, onToggleUpcoming, onToggleHistorical, upcomingCount, historicalCount }: Props) {
+export default function EpicTimeline({ epics, hoveredKey, onHover, showUpcoming, showHistorical, onToggleUpcoming, onToggleHistorical, upcomingCount, historicalCount, rankMap = {} }: Props) {
   // Only render epics that have at least a due date
   const epicsWithDates = epics.filter(e => e.dueDate);
   if (epicsWithDates.length === 0) return null;
@@ -116,7 +117,7 @@ export default function EpicTimeline({ epics, hoveredKey, onHover, showUpcoming,
           <div style={{ minWidth: "640px" }}>
             {/* Month markers — offset to align with bar area */}
             <div className="flex">
-              <div className="w-32 shrink-0" />
+              <div className="w-10 shrink-0" />
               <div className="flex-1 relative h-6 mb-2">
                 {markers.map((m) => (
                   <span
@@ -135,7 +136,7 @@ export default function EpicTimeline({ epics, hoveredKey, onHover, showUpcoming,
               {/* Today line — only over the bar area, offset by label width */}
               {todayPct >= 0 && todayPct <= 100 && (
                 <div className="absolute top-0 bottom-0 flex pointer-events-none" style={{ left: 0, right: 0 }}>
-                  <div className="w-32 shrink-0" />
+                  <div className="w-10 shrink-0" />
                   <div className="flex-1 relative">
                     <div
                       className="absolute top-0 bottom-0 w-px bg-indigo-500/60 z-10"
@@ -167,7 +168,13 @@ export default function EpicTimeline({ epics, hoveredKey, onHover, showUpcoming,
                     onMouseEnter={() => onHover(epic.key)}
                     onMouseLeave={() => onHover(null)}
                   >
-                    <div className="w-32 shrink-0 pr-3 text-xs text-gray-500 dark:text-gray-400 truncate text-right">{epic.summary}</div>
+                    <div className="w-10 shrink-0 flex items-center justify-end pr-2">
+                      {rankMap[epic.key] !== undefined ? (
+                        <span className="text-xs font-bold w-6 h-6 rounded-full bg-indigo-600 text-white flex items-center justify-center">{rankMap[epic.key]}</span>
+                      ) : (
+                        <span className="w-2 h-2 rounded-full bg-gray-400/40" />
+                      )}
+                    </div>
                     <div className="flex-1 relative h-6">
                       <div
                         className={`absolute h-5 rounded-full top-0.5 ${barBg} border ${STATUS_COLORS[group]?.replace("bg-", "border-")}/30 flex items-center px-2 cursor-pointer transition-all`}

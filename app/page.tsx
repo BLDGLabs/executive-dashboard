@@ -125,6 +125,8 @@ export default function Home() {
   const toDo = visibleEpics.filter(e => getStatusGroup(e.status) === "To Do");
   const complete = visibleEpics.filter(e => getStatusGroup(e.status) === "Complete");
 
+  const rankMap = Object.fromEntries(inProgress.map((e, i) => [e.key, i + 1]));
+
   const timelineEpics = [
     ...inProgress,
     ...(showUpcoming ? toDo : []),
@@ -216,6 +218,7 @@ export default function Home() {
             onToggleHistorical={() => setShowHistorical(v => !v)}
             upcomingCount={toDo.length}
             historicalCount={complete.length}
+            rankMap={rankMap}
           />
           <EpicList
             inProgress={inProgress}
