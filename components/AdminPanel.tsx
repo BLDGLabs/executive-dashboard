@@ -11,6 +11,7 @@ interface AdminUser {
   lastName: string;
   role: string;
   projectIds: string[];
+  jiraEnabled: boolean;
   createdAt: string;
 }
 
@@ -22,7 +23,7 @@ interface AdminPanelProps {
 const ROLES = ["user", "superadmin"];
 
 function blankForm() {
-  return { email: "", password: "", firstName: "", lastName: "", role: "user", projectIds: "" };
+  return { email: "", password: "", firstName: "", lastName: "", role: "user", projectIds: "", jiraEnabled: false };
 }
 
 export default function AdminPanel({ apiUrl, onClose }: AdminPanelProps) {
@@ -68,6 +69,7 @@ export default function AdminPanel({ apiUrl, onClose }: AdminPanelProps) {
       lastName: u.lastName,
       role: u.role,
       projectIdsStr: u.projectIds.join(", "),
+      jiraEnabled: u.jiraEnabled,
       password: ""
     });
     setSaveError(null);
@@ -87,7 +89,8 @@ export default function AdminPanel({ apiUrl, onClose }: AdminPanelProps) {
         firstName: editForm.firstName ?? "",
         lastName: editForm.lastName ?? "",
         role: editForm.role,
-        projectIds: (editForm.projectIdsStr || "").split(",").map(s => s.trim()).filter(Boolean)
+        projectIds: (editForm.projectIdsStr || "").split(",").map(s => s.trim()).filter(Boolean),
+        jiraEnabled: editForm.jiraEnabled ?? false
       };
       if (editForm.password) body.password = editForm.password;
 
@@ -133,7 +136,8 @@ export default function AdminPanel({ apiUrl, onClose }: AdminPanelProps) {
           firstName: createForm.firstName.trim(),
           lastName: createForm.lastName.trim(),
           role: createForm.role,
-          projectIds: createForm.projectIds.split(",").map(s => s.trim()).filter(Boolean)
+          projectIds: createForm.projectIds.split(",").map(s => s.trim()).filter(Boolean),
+          jiraEnabled: createForm.jiraEnabled
         })
       });
       const data = await res.json();
@@ -232,6 +236,15 @@ export default function AdminPanel({ apiUrl, onClose }: AdminPanelProps) {
                     );
                   })}
                 </div>
+                <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 col-span-2">
+                  <input
+                    type="checkbox"
+                    checked={createForm.jiraEnabled}
+                    onChange={e => setCreateForm(f => ({ ...f, jiraEnabled: e.target.checked }))}
+                    className="rounded border-gray-300 dark:border-gray-600 text-indigo-600 focus:ring-indigo-500"
+                  />
+                  Jira Enabled
+                </label>
               </div>
               {createError && <p className="text-xs text-red-500 mt-2">{createError}</p>}
               <div className="flex gap-2 mt-3">
@@ -313,6 +326,15 @@ export default function AdminPanel({ apiUrl, onClose }: AdminPanelProps) {
                         onChange={e => setEditForm(f => ({ ...f, password: e.target.value }))}
                         className={`${inputCls} col-span-2`}
                       />
+                      <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 col-span-2">
+                        <input
+                          type="checkbox"
+                          checked={editForm.jiraEnabled ?? false}
+                          onChange={e => setEditForm(f => ({ ...f, jiraEnabled: e.target.checked }))}
+                          className="rounded border-gray-300 dark:border-gray-600 text-indigo-600 focus:ring-indigo-500"
+                        />
+                        Jira Enabled
+                      </label>
                     </div>
                     {saveError && <p className="text-xs text-red-500 mb-2">{saveError}</p>}
                     <div className="flex gap-2">
@@ -348,7 +370,7 @@ export default function AdminPanel({ apiUrl, onClose }: AdminPanelProps) {
                         </span>
                       </div>
                       <p className="text-xs text-gray-400 mt-0.5 truncate">{u.email}</p>
-                      <div className="flex items-center gap-3 mt-1">
+                      <div className="flex items-center gap-3 mt-1 flex-wrap">
                         {allProjects.map(p => {
                           const checked = u.projectIds.includes(p.id);
                           return (
@@ -375,6 +397,22 @@ export default function AdminPanel({ apiUrl, onClose }: AdminPanelProps) {
                             </label>
                           );
                         })}
+                        <label className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={u.jiraEnabled}
+                            onChange={async (e) => {
+                              setUsers(prev => prev.map(usr => usr.id === u.id ? { ...usr, jiraEnabled: e.target.checked } : usr));
+                              await authFetch(`${apiUrl}/api/admin/users/${u.id}`, {
+                                method: "PATCH",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ jiraEnabled: e.target.checked })
+                              });
+                            }}
+                            className="rounded border-gray-300 dark:border-gray-600 text-indigo-600 focus:ring-indigo-500 h-3.5 w-3.5"
+                          />
+                          Jira
+                        </label>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">

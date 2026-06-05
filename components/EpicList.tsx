@@ -15,6 +15,7 @@ type Props = {
   showHistorical?: boolean;
   onToggleUpcoming?: () => void;
   onToggleHistorical?: () => void;
+  jiraEnabled?: boolean;
 };
 
 type EpicCardProps = {
@@ -30,15 +31,18 @@ type EpicCardProps = {
   onMouseLeave: () => void;
   rank?: number;
   epicPriority?: string;
+  jiraEnabled?: boolean;
 };
 
-function EpicCard({ epic, statusColor, statusBg, statusLabel, titleColor, descColor, dateColor, isHovered, onMouseEnter, onMouseLeave, rank, epicPriority = 'Medium' }: EpicCardProps) {
+function EpicCard({ epic, statusColor, statusBg, statusLabel, titleColor, descColor, dateColor, isHovered, onMouseEnter, onMouseLeave, rank, epicPriority = 'Medium', jiraEnabled }: EpicCardProps) {
+  const [expanded, setExpanded] = useState(false);
   const showPriorityBadge = epicPriority !== 'Medium';
   return (
     <div
-      className={`rounded-lg border ${statusBg} p-4 transition-all cursor-default ${isHovered ? "ring-2 ring-indigo-500/60" : ""}`}
+      className={`rounded-lg border ${statusBg} p-4 transition-all ${jiraEnabled ? "cursor-pointer" : "cursor-default"} ${isHovered ? "ring-2 ring-indigo-500/60" : ""}`}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
+      onClick={() => jiraEnabled && setExpanded(v => !v)}
     >
       <div className="flex items-start justify-between gap-2 mb-2">
         <div className="flex items-center gap-1.5 flex-1 min-w-0">
@@ -71,6 +75,19 @@ function EpicCard({ epic, statusColor, statusBg, statusLabel, titleColor, descCo
             </>
           )}
         </p>
+      )}
+      {jiraEnabled && expanded && (
+        <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+          <a
+            href={`https://bldglabs.atlassian.net/browse/${epic.key}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={e => e.stopPropagation()}
+            className="inline-flex items-center gap-1.5 text-xs font-medium bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-md transition-colors"
+          >
+            ↗ Launch Jira
+          </a>
+        </div>
       )}
     </div>
   );
@@ -106,7 +123,7 @@ const SECTION_CONFIG = {
   },
 };
 
-export default function EpicList({ inProgress, toDo, complete, showSection, hoveredKey = null, onHover, showUpcoming = false, showHistorical = false, onToggleUpcoming, onToggleHistorical }: Props) {
+export default function EpicList({ inProgress, toDo, complete, showSection, hoveredKey = null, onHover, showUpcoming = false, showHistorical = false, onToggleUpcoming, onToggleHistorical, jiraEnabled }: Props) {
   // toggle state is now lifted — use props if provided, else local fallback
   const [, setLocalShowUpcoming] = useState(false);
   const [, setLocalShowHistorical] = useState(false);
@@ -143,6 +160,7 @@ export default function EpicList({ inProgress, toDo, complete, showSection, hove
                   onMouseLeave={() => onHover?.(null)}
                   rank={index + 1}
                   epicPriority={epic.priority}
+                  jiraEnabled={jiraEnabled}
                 />
               ))}
             </div>
@@ -185,6 +203,7 @@ export default function EpicList({ inProgress, toDo, complete, showSection, hove
                   isHovered={false}
                   onMouseEnter={() => {}}
                   onMouseLeave={() => {}}
+                  jiraEnabled={jiraEnabled}
                 />
               ))}
             </div>
@@ -214,6 +233,7 @@ export default function EpicList({ inProgress, toDo, complete, showSection, hove
                   isHovered={false}
                   onMouseEnter={() => {}}
                   onMouseLeave={() => {}}
+                  jiraEnabled={jiraEnabled}
                 />
               ))}
             </div>

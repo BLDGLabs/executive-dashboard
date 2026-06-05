@@ -91,7 +91,7 @@ async function getAuthUser(event, client) {
   if (!sessionId) return null;
   try {
     const res = await client.query(
-      `SELECT u.id, u.email, u.first_name, u.last_name, u.role, u.project_ids
+      `SELECT u.id, u.email, u.first_name, u.last_name, u.role, u.project_ids, u.jira_enabled
        FROM users u
        JOIN sessions s ON s.user_id = u.id
        WHERE s.id = $1 AND s.expires_at > NOW()`,
@@ -105,7 +105,8 @@ async function getAuthUser(event, client) {
       firstName: row.first_name || '',
       lastName: row.last_name || '',
       role: row.role,
-      projectIds: row.project_ids || []
+      projectIds: row.project_ids || [],
+      jiraEnabled: row.jira_enabled || false
     };
   } catch (e) {
     console.error('getAuthUser error:', e);
@@ -301,7 +302,7 @@ exports.handler = async (event) => {
       if (!user) return { statusCode: 401, headers: corsHeaders, body: JSON.stringify({ error: 'Unauthorized' }) };
       if (user.role !== 'superadmin') return { statusCode: 403, headers: corsHeaders, body: JSON.stringify({ error: 'Forbidden' }) };
 
-      const res = await db.query('SELECT id, email, first_name, last_name, role, project_ids, created_at FROM users ORDER BY email');
+      const res = await db.query('SELECT id, email, first_name, last_name, role, project_ids, jira_enabled, created_at FROM users ORDER BY email');
       return {
         statusCode: 200,
         headers: corsHeaders,
@@ -312,6 +313,7 @@ exports.handler = async (event) => {
           lastName: r.last_name || '',
           role: r.role,
           projectIds: r.project_ids || [],
+          jiraEnabled: r.jira_enabled || false,
           createdAt: r.created_at
         })) })
       };
@@ -333,15 +335,15 @@ exports.handler = async (event) => {
       if (user.role !== 'superadmin') return { statusCode: 403, headers: corsHeaders, body: JSON.stringify({ error: 'Forbidden' }) };
 
       const body = JSON.parse(event.body || '{}');
-      const { email, password, role, projectIds, firstName, lastName } = body;
+      const { email, password, role, projectIds, firstName, lastName, jiraEnabled } = body;
       if (!email || !password) {
         return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'email and password required' }) };
       }
 
       const hashedPassword = await bcrypt.hash(password, 10);
       const res = await db.query(
-        'INSERT INTO users (email, password_hash, role, project_ids, first_name, last_name) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, email, first_name, last_name, role, project_ids, created_at',
-        [email, hashedPassword, role || 'user', projectIds || [], firstName || '', lastName || '']
+        'INSERT INTO users (email, password_hash, role, project_ids, first_name, last_name, jira_enabled) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, email, first_name, last_name, role, project_ids, jira_enabled, created_at',
+        [email, hashedPassword, role || 'user', projectIds || [], firstName || '', lastName || '', jiraEnabled || false]
       );
       const newUser = res.rows[0];
       return {
@@ -354,6 +356,7 @@ exports.handler = async (event) => {
           lastName: newUser.last_name || '',
           role: newUser.role,
           projectIds: newUser.project_ids || [],
+          jiraEnabled: newUser.jira_enabled || false,
           createdAt: newUser.created_at
         } })
       };
@@ -403,15 +406,29 @@ exports.handler = async (event) => {
         updates.push(`last_name = $${idx++}`);
         values.push(body.lastName);
       }
+      if (body.jiraEnabled !== undefined) {
+        updates.push(`jira_enabled = $${idx++}`);
+        values.push(body.jiraEnabled);
+      }
 
       if (updates.length === 0) {
         return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'No fields to update' }) };
       }
 
       values.push(id);
-      await db.query(`UPDATE users SET ${updates.join(', ')} WHERE id = $${idx}`, values);
+      const updatedRes = await db.query(`UPDATE users SET ${updates.join(', ')} WHERE id = $${idx} RETURNING id, email, first_name, last_name, role, project_ids, jira_enabled, created_at`, values);
+      const updatedUser = updatedRes.rows[0];
 
-      return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ success: true }) };
+      return { statusCode: 200, headers: corsHeaders, body: JSON.stringify({ success: true, user: updatedUser ? {
+        id: updatedUser.id,
+        email: updatedUser.email,
+        firstName: updatedUser.first_name || '',
+        lastName: updatedUser.last_name || '',
+        role: updatedUser.role,
+        projectIds: updatedUser.project_ids || [],
+        jiraEnabled: updatedUser.jira_enabled || false,
+        createdAt: updatedUser.created_at
+      } : null }) };
     } catch (err) {
       console.error('PATCH admin/users/:id error:', err);
       return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: err.message }) };

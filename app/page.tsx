@@ -19,6 +19,7 @@ export type User = {
   lastName: string;
   role: string;
   projectIds: string[];
+  jiraEnabled: boolean;
 };
 
 export type Epic = {
@@ -226,6 +227,7 @@ export default function Home() {
             showSection="active"
             hoveredKey={hoveredKey}
             onHover={setHoveredKey}
+            jiraEnabled={user?.jiraEnabled}
           />
           <EpicTimeline
             epics={timelineEpics}
@@ -246,6 +248,7 @@ export default function Home() {
             showSection="historical"
             showUpcoming={showUpcoming}
             showHistorical={showHistorical}
+            jiraEnabled={user?.jiraEnabled}
           />
         </>
       )}
