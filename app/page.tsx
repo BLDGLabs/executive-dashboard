@@ -231,6 +231,7 @@ export default function Home() {
             showSection="active"
             hoveredKey={hoveredKey}
             onHover={setHoveredKey}
+            showResearching={showResearching}
             jiraEnabled={user?.jiraEnabled}
           />
           <EpicTimeline
