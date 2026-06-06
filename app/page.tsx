@@ -153,10 +153,10 @@ export default function Home() {
   const rankMap = Object.fromEntries(researching.map((e, i) => [e.key, i + 1]));
 
   const timelineEpics = [
+    ...(showDone ? done : []),
     ...ready,
     ...(showResearching ? researching : []),
     ...(showBacklog ? backlog : []),
-    ...(showDone ? done : []),
   ];
 
   const displayName = [user.firstName, user.lastName].filter(Boolean).join(" ") || user.email;
