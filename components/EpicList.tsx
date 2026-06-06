@@ -103,8 +103,8 @@ const SECTION_CONFIG = {
     dateColor: "text-gray-500 dark:text-gray-400",
   },
   ready: {
-    label: "Ready",
-    statusLabel: "Ready",
+    label: "Ready to Work",
+    statusLabel: "Ready to Work",
     color: "text-sky-700 bg-sky-100 dark:text-sky-300 dark:bg-sky-500/20",
     bg: "bg-white dark:bg-gray-800 border-sky-400 dark:border-sky-500/40",
     titleColor: "text-gray-900 dark:text-white",
@@ -177,7 +177,6 @@ export default function EpicList({ researching, ready, backlog, done, showSectio
   if (showSection === "active") {
     return (
       <div className="mb-10">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-200 mb-4">Researching</h2>
         <EpicSection
           epics={researching}
           config={SECTION_CONFIG.researching}
@@ -186,6 +185,18 @@ export default function EpicList({ researching, ready, backlog, done, showSectio
           jiraEnabled={jiraEnabled}
           showRanks={true}
         />
+        {ready.length > 0 && (
+          <div className="mt-6">
+            <EpicSection
+              epics={ready}
+              config={SECTION_CONFIG.ready}
+              hoveredKey={hoveredKey}
+              onHover={onHover}
+              jiraEnabled={jiraEnabled}
+              showRanks={true}
+            />
+          </div>
+        )}
       </div>
     );
   }
@@ -196,13 +207,6 @@ export default function EpicList({ researching, ready, backlog, done, showSectio
 
   return (
     <div className="mt-8 space-y-8">
-      {showReady && (
-        <EpicSection
-          epics={ready}
-          config={SECTION_CONFIG.ready}
-          jiraEnabled={jiraEnabled}
-        />
-      )}
       {showBacklog && (
         <EpicSection
           epics={backlog}

@@ -44,7 +44,7 @@ export type ReadinessGroup = "Researching" | "Ready" | "Backlog" | "Done";
 
 export function getReadinessGroup(readiness: string): ReadinessGroup {
   if (readiness === "Researching") return "Researching";
-  if (readiness === "Ready") return "Ready";
+  if (readiness === "Ready" || readiness === "Ready to Work") return "Ready";
   if (readiness === "Done") return "Done";
   return "Backlog";
 }
@@ -62,7 +62,7 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [hoveredKey, setHoveredKey] = useState<string | null>(null);
-  const [showReady, setShowReady] = useState(false);
+  const [showReady, setShowReady] = useState(true);
   const [showBacklog, setShowBacklog] = useState(false);
   const [showDone, setShowDone] = useState(false);
 

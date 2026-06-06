@@ -108,7 +108,7 @@ export default function EpicTimeline({ epics, hoveredKey, onHover, showReady, sh
                 : "bg-white border-gray-300 text-gray-600 hover:text-gray-900 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
             }`}
           >
-            {showReady ? "Hide" : "Show"} Ready ({readyCount})
+            {showReady ? "Hide" : "Show"} Ready to Work ({readyCount})
           </button>
           <button
             onClick={onToggleBacklog}
