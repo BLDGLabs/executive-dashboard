@@ -131,13 +131,14 @@ const SECTION_CONFIG = {
   },
 };
 
-function EpicSection({ epics, config, hoveredKey, onHover, jiraEnabled, showRanks }: {
+function EpicSection({ epics, config, hoveredKey, onHover, jiraEnabled, showRanks, rankMap }: {
   epics: Epic[];
   config: typeof SECTION_CONFIG[keyof typeof SECTION_CONFIG];
   hoveredKey?: string | null;
   onHover?: (key: string | null) => void;
   jiraEnabled?: boolean;
   showRanks?: boolean;
+  rankMap?: Record<string, number>;
 }) {
   if (epics.length === 0) return null;
   return (
@@ -162,7 +163,7 @@ function EpicSection({ epics, config, hoveredKey, onHover, jiraEnabled, showRank
             isHovered={epic.key === (hoveredKey ?? null)}
             onMouseEnter={() => onHover?.(epic.key)}
             onMouseLeave={() => onHover?.(null)}
-            rank={showRanks ? index + 1 : undefined}
+            rank={rankMap ? rankMap[epic.key] : (showRanks ? index + 1 : undefined)}
             epicPriority={epic.priority}
             jiraEnabled={jiraEnabled}
           />
@@ -175,34 +176,52 @@ function EpicSection({ epics, config, hoveredKey, onHover, jiraEnabled, showRank
 export default function EpicList({ researching, ready, backlog, done, showSection, hoveredKey = null, onHover, showReady = false, showBacklog = false, showDone = false, jiraEnabled }: Props) {
 
   if (showSection === "active") {
+    // Continuous rank across Ready to Work → Researching → Backlog (not Done)
+    const rankedEpics: Epic[] = [
+      ...ready,
+      ...researching,
+      ...(showBacklog ? backlog : []),
+    ];
+    const rankMap = Object.fromEntries(rankedEpics.map((e, i) => [e.key, i + 1]));
+
     return (
       <div className="mb-10">
-        <EpicSection
-          epics={researching}
-          config={SECTION_CONFIG.researching}
-          hoveredKey={hoveredKey}
-          onHover={onHover}
-          jiraEnabled={jiraEnabled}
-          showRanks={true}
-        />
         {ready.length > 0 && (
-          <div className="mt-6">
+          <div className="mb-6">
             <EpicSection
               epics={ready}
               config={SECTION_CONFIG.ready}
               hoveredKey={hoveredKey}
               onHover={onHover}
               jiraEnabled={jiraEnabled}
-              showRanks={true}
+              rankMap={rankMap}
             />
           </div>
+        )}
+        {researching.length > 0 && (
+          <EpicSection
+            epics={researching}
+            config={SECTION_CONFIG.researching}
+            hoveredKey={hoveredKey}
+            onHover={onHover}
+            jiraEnabled={jiraEnabled}
+            rankMap={rankMap}
+          />
         )}
       </div>
     );
   }
 
-  // secondary section — shows hidden groups when toggled on
-  const hasAnything = (showReady && ready.length > 0) || (showBacklog && backlog.length > 0) || (showDone && done.length > 0);
+  // secondary section — shows Backlog/Done when toggled on
+  // Compute continuous rank across ready + researching + backlog (not done)
+  const rankedEpics: Epic[] = [
+    ...ready,
+    ...researching,
+    ...(showBacklog ? backlog : []),
+  ];
+  const rankMap = Object.fromEntries(rankedEpics.map((e, i) => [e.key, i + 1]));
+
+  const hasAnything = (showBacklog && backlog.length > 0) || (showDone && done.length > 0);
   if (!hasAnything) return null;
 
   return (
@@ -212,6 +231,7 @@ export default function EpicList({ researching, ready, backlog, done, showSectio
           epics={backlog}
           config={SECTION_CONFIG.backlog}
           jiraEnabled={jiraEnabled}
+          rankMap={rankMap}
         />
       )}
       {showDone && (
