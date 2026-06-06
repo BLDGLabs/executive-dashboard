@@ -33,6 +33,7 @@ type EpicCardProps = {
 };
 
 function EpicCard({ epic, statusColor, statusBg, statusLabel, titleColor, descColor, dateColor, isHovered, onMouseEnter, onMouseLeave, rank, epicPriority = 'Medium', jiraEnabled }: EpicCardProps) {
+  const showPriorityBadge = epicPriority !== 'Medium';
   return (
     <div
       className={`rounded-lg border ${statusBg} p-4 transition-all ${isHovered ? "ring-2 ring-indigo-500/60" : ""}`}
